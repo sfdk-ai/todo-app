@@ -20,7 +20,10 @@
 
       <div class="layout">
         <section aria-label="Todos">
-          <input id="search" type="search" placeholder="Search" aria-label="Search todos">
+          <div class="toolbar">
+            <input id="search" type="search" placeholder="Search" aria-label="Search todos">
+            <a id="download" class="button" href="/api/todos.csv" download>Download CSV</a>
+          </div>
           <ul id="todos" class="todos"></ul>
           <p id="empty" class="muted" hidden>Nothing here yet.</p>
           <nav class="pager" aria-label="Pages">

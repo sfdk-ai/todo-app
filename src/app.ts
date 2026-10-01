@@ -1,8 +1,16 @@
 import express, { type ErrorRequestHandler, type RequestHandler } from 'express';
 import { fileURLToPath } from 'node:url';
 import type pg from 'pg';
-import { createTodo, deleteTodo, getTodo, listTags, listTodos, markDone, updateTodo } from './todos.js';
-import { ValidationError, parseId, parseListQuery, parseNewTodo, parseTodoChanges } from './validation.js';
+import { toCsv } from './csv.js';
+import { createTodo, deleteTodo, exportTodos, getTodo, listTags, listTodos, markDone, updateTodo } from './todos.js';
+import {
+  ValidationError,
+  parseExportQuery,
+  parseId,
+  parseListQuery,
+  parseNewTodo,
+  parseTodoChanges,
+} from './validation.js';
 
 const publicDir = fileURLToPath(new URL('../public/', import.meta.url));
 
@@ -22,6 +30,11 @@ export function createApp(pool: pg.Pool): express.Express {
 
   app.post('/api/todos', async (req, res) => {
     res.status(201).json(await createTodo(pool, parseNewTodo(req.body)));
+  });
+
+  app.get('/api/todos.csv', async (req, res) => {
+    const todos = await exportTodos(pool, parseExportQuery(req.query));
+    res.attachment('todos.csv').type('text/csv; charset=utf-8').send(toCsv(todos));
   });
 
   app.get('/api/todos/:id', async (req, res) => {

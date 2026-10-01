@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   ValidationError,
+  parseExportQuery,
   parseId,
   parseListQuery,
   parseNewTodo,
@@ -110,6 +111,21 @@ describe('parseListQuery', () => {
 
   it('rejects a parameter given more than once', () => {
     expect(() => parseListQuery({ q: ['milk', 'bread'] })).toThrow(new ValidationError('q must be given once'));
+  });
+});
+
+describe('parseExportQuery', () => {
+  it('reads the trimmed search text', () => {
+    expect(parseExportQuery({ q: ' milk ' })).toEqual({ q: 'milk' });
+  });
+
+  it('exports everything when there is no search text or it is blank', () => {
+    expect(parseExportQuery({})).toEqual({});
+    expect(parseExportQuery({ q: '   ' })).toEqual({});
+  });
+
+  it('rejects search text given more than once', () => {
+    expect(() => parseExportQuery({ q: ['milk', 'bread'] })).toThrow(new ValidationError('q must be given once'));
   });
 });
 
