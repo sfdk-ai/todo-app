@@ -39,7 +39,7 @@ export async function listTodos(db: pg.Pool, { q, page, pageSize }: ListQuery): 
   const last = page * pageSize;
 
   const counted = await db.query<{ total: number }>(
-    `SELECT count(*)::int AS total FROM todos WHERE $1::text IS NULL OR title LIKE $1`,
+    `SELECT count(*)::int AS total FROM todos WHERE $1::text IS NULL OR title ILIKE $1`,
     [search],
   );
   const { rows } = await db.query<TodoRow>(
@@ -48,7 +48,7 @@ export async function listTodos(db: pg.Pool, { q, page, pageSize }: ListQuery): 
          SELECT ${TODO_COLUMNS},
                 row_number() OVER (ORDER BY created_at DESC, id DESC) AS position
            FROM todos
-          WHERE $1::text IS NULL OR title LIKE $1
+          WHERE $1::text IS NULL OR title ILIKE $1
        ) numbered
       WHERE position BETWEEN $2 AND $3
       ORDER BY position`,

@@ -90,6 +90,19 @@ describe('GET /api/todos', () => {
     expect(response.body.items.map((todo: { title: string }) => todo.title)).toEqual(['Buy milk']);
   });
 
+  it('finds todos whatever the case of the search text', async () => {
+    await createTodo('Buy milk');
+    await createTodo('Call grandma');
+
+    for (const q of ['Milk', 'MILK', 'buy', 'bUY mILK']) {
+      const response = await app.request('GET', `/api/todos?q=${encodeURIComponent(q)}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.total, q).toBe(1);
+      expect(response.body.items.map((todo: { title: string }) => todo.title), q).toEqual(['Buy milk']);
+    }
+  });
+
   it('answers the first page and the total when there are more pages', async () => {
     for (const title of ['One', 'Two', 'Three', 'Four', 'Five']) {
       await createTodo(title);
