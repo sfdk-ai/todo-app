@@ -1,3 +1,5 @@
+import { addedAgo } from './relative-time.js';
+
 const API = '/api';
 const PAGE_SIZE = 10;
 
@@ -57,7 +59,10 @@ function renderTodo(todo) {
   text.append(element('span', 'title', todo.title));
   const meta = element('div', 'meta');
   for (const tag of todo.tags) meta.append(element('span', 'tag', tag));
-  meta.append(element('span', 'muted', new Date(todo.createdAt).toLocaleDateString()));
+  const added = element('span', 'muted added', addedAgo(todo.createdAt));
+  added.dataset.createdAt = todo.createdAt;
+  added.title = new Date(todo.createdAt).toLocaleString();
+  meta.append(added);
   text.append(meta);
 
   const remove = button('Delete', 'danger', () => act(() => request('DELETE', `/todos/${todo.id}`)));
@@ -125,5 +130,10 @@ byId('next').addEventListener('click', () => {
   state.page += 1;
   act(async () => {});
 });
+
+// Keep each todo's age right while the page stays open.
+setInterval(() => {
+  for (const node of document.querySelectorAll('.added')) node.textContent = addedAgo(node.dataset.createdAt);
+}, 60 * 1000);
 
 act(async () => {});
