@@ -12,8 +12,27 @@
   color-scheme: light dark;
 }
 
+/* The header's theme switch sets data-theme on <html>; with none set, the computer's setting wins. */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --background: #111316;
+  --surface: #1a1d21;
+  --text: #e8eaed;
+  --muted: #9aa0a6;
+  --border: #2c3036;
+  --accent: #4f8cff;
+  --accent-text: #0b1020;
+  --danger: #f97066;
+  --tag: #23264a;
+  --tag-text: #c7d2fe;
+  color-scheme: dark;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --background: #111316;
     --surface: #1a1d21;
     --text: #e8eaed;
@@ -45,8 +64,44 @@ main {
 }
 
 h1 {
-  margin: 0 0 16px;
+  margin: 0;
   font-size: 28px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.theme-switch {
+  display: flex;
+}
+
+.theme-switch button {
+  border-radius: 0;
+  font-size: 13px;
+}
+
+.theme-switch button + button {
+  border-left-width: 0;
+}
+
+.theme-switch button:first-child {
+  border-radius: 6px 0 0 6px;
+}
+
+.theme-switch button:last-child {
+  border-radius: 0 6px 6px 0;
+}
+
+.theme-switch button[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
 }
 
 h2 {

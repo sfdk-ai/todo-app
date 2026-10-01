@@ -4,12 +4,28 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Todos</title>
+    <script>
+      // Apply a saved Light or Dark before the first paint; public/theme.js does the rest.
+      try {
+        const theme = localStorage.getItem('todo-theme');
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+      } catch {
+        // No storage: follow the computer's setting.
+      }
+    </script>
     <link rel="stylesheet" href="style.css">
     <script type="module" src="app.js"></script>
   </head>
   <body>
     <main>
-      <h1>Todos</h1>
+      <header class="page-header">
+        <h1>Todos</h1>
+        <div id="theme-switch" class="theme-switch" role="group" aria-label="Theme">
+          <button type="button" data-theme-choice="system" aria-pressed="true">System</button>
+          <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+          <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+        </div>
+      </header>
 
       <form id="new-todo" autocomplete="off">
         <input id="title" name="title" placeholder="What needs doing?" required maxlength="200" aria-label="Title">
