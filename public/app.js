@@ -95,15 +95,26 @@ async function refresh() {
   byId('no-tags').hidden = tags.length > 0;
 }
 
-byId('new-todo').addEventListener('submit', (event) => {
+let adding = false;
+byId('new-todo').addEventListener('submit', async (event) => {
   event.preventDefault();
+  // A second Enter or click while the first add is saving would add the todo twice.
+  if (adding) return;
+  adding = true;
+  const addButton = event.target.querySelector('button[type="submit"]');
+  addButton.disabled = true;
   const title = byId('title').value;
   const tags = byId('tags').value.split(',');
-  act(async () => {
-    await request('POST', '/todos', { title, tags });
-    byId('new-todo').reset();
-    state.page = 1;
-  });
+  try {
+    await act(async () => {
+      await request('POST', '/todos', { title, tags });
+      byId('new-todo').reset();
+      state.page = 1;
+    });
+  } finally {
+    adding = false;
+    addButton.disabled = false;
+  }
 });
 
 let searchTimer;
