@@ -177,6 +177,16 @@ describe('PATCH /api/todos/:id', () => {
     expect((await app.request('GET', `/api/todos/${created.id}`)).body.tags).toEqual(['shop', 'weekend']);
   });
 
+  it('changes only the title when sent only a title', async () => {
+    const created = await createTodo('Buy mlik', ['groceries']);
+    await app.request('POST', `/api/todos/${created.id}/done`);
+
+    const response = await app.request('PATCH', `/api/todos/${created.id}`, { title: '  Buy milk  ' });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({ id: created.id, title: 'Buy milk', done: true, tags: ['groceries'] });
+  });
+
   it('reopens a done todo', async () => {
     const created = await createTodo('Buy milk');
     await app.request('POST', `/api/todos/${created.id}/done`);

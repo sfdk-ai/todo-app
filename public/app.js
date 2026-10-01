@@ -46,6 +46,40 @@ function button(label, className, onClick) {
   return node;
 }
 
+function editTitle(todo, span) {
+  const input = element('input', 'title-edit');
+  input.value = todo.title;
+  input.maxLength = 200;
+  input.setAttribute('aria-label', 'Edit title');
+  let finished = false;
+
+  const finish = (save) => {
+    if (finished) return;
+    finished = true;
+    const title = input.value.trim();
+    if (!save || title === todo.title) {
+      input.replaceWith(span);
+      return;
+    }
+    act(() =>
+      request('PATCH', `/todos/${todo.id}`, { title }).catch((error) => {
+        input.replaceWith(span);
+        throw error;
+      }),
+    );
+  };
+
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') finish(true);
+    if (event.key === 'Escape') finish(false);
+  });
+  input.addEventListener('blur', () => finish(true));
+
+  span.replaceWith(input);
+  input.focus();
+  input.select();
+}
+
 function renderTodo(todo) {
   const item = element('li', todo.done ? 'todo done' : 'todo');
 
@@ -54,7 +88,10 @@ function renderTodo(todo) {
     : button('Done', 'primary', () => act(() => request('POST', `/todos/${todo.id}/done`)));
 
   const text = element('div', 'text');
-  text.append(element('span', 'title', todo.title));
+  const title = element('span', 'title', todo.title);
+  title.title = 'Double-click to edit';
+  title.addEventListener('dblclick', () => editTitle(todo, title));
+  text.append(title);
   const meta = element('div', 'meta');
   for (const tag of todo.tags) meta.append(element('span', 'tag', tag));
   meta.append(element('span', 'muted', new Date(todo.createdAt).toLocaleDateString()));
