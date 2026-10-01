@@ -9,6 +9,7 @@ const browserGlobals = {
   console: 'readonly',
   setTimeout: 'readonly',
   clearTimeout: 'readonly',
+  setInterval: 'readonly',
   URLSearchParams: 'readonly',
 };
 
