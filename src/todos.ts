@@ -35,7 +35,7 @@ const TODO_COLUMNS = 'id, title, done, created_at';
 
 export async function listTodos(db: pg.Pool, { q, page, pageSize }: ListQuery): Promise<TodoPage> {
   const search = q === undefined ? null : `%${q}%`;
-  const first = (page - 1) * pageSize;
+  const first = (page - 1) * pageSize + 1;
   const last = page * pageSize;
 
   const counted = await db.query<{ total: number }>(

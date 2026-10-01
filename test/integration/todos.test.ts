@@ -103,6 +103,18 @@ describe('GET /api/todos', () => {
     expect(response.body.items.map((todo: { title: string }) => todo.title)).toEqual(['Five', 'Four']);
   });
 
+  it('answers the next page without repeating the last todo of the page before', async () => {
+    for (const title of ['One', 'Two', 'Three', 'Four', 'Five']) {
+      await createTodo(title);
+    }
+
+    const response = await app.request('GET', '/api/todos?page=2&pageSize=2');
+
+    expect(response.status).toBe(200);
+    expect(response.body.total).toBe(5);
+    expect(response.body.items.map((todo: { title: string }) => todo.title)).toEqual(['Three', 'Two']);
+  });
+
   it('answers an empty page past the end', async () => {
     await createTodo('Buy milk');
 
