@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Todos</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <main>
+      <h1>Todos</h1>
+
+      <form id="new-todo" autocomplete="off">
+        <input id="title" name="title" placeholder="What needs doing?" required maxlength="200" aria-label="Title">
+        <input id="tags" name="tags" placeholder="Tags, separated by commas" aria-label="Tags">
+        <button type="submit">Add</button>
+      </form>
+      <p id="error" class="error" role="alert" hidden></p>
+
+      <div class="layout">
+        <section aria-label="Todos">
+          <input id="search" type="search" placeholder="Search" aria-label="Search todos">
+          <ul id="todos" class="todos"></ul>
+          <p id="empty" class="muted" hidden>Nothing here yet.</p>
+          <nav class="pager" aria-label="Pages">
+            <button id="previous" type="button">Previous</button>
+            <span id="page-info" class="muted"></span>
+            <button id="next" type="button">Next</button>
+          </nav>
+        </section>
+
+        <aside aria-labelledby="tags-heading">
+          <h2 id="tags-heading">Tags</h2>
+          <ul id="tag-counts" class="tag-counts"></ul>
+          <p id="no-tags" class="muted" hidden>No tags yet.</p>
+        </aside>
+      </div>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,190 @@
+:root {
+  --background: #f6f7f9;
+  --surface: #ffffff;
+  --text: #1c2024;
+  --muted: #6b7280;
+  --border: #e2e5ea;
+  --accent: #2563eb;
+  --accent-text: #ffffff;
+  --danger: #b42318;
+  --tag: #eef2ff;
+  --tag-text: #3730a3;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #111316;
+    --surface: #1a1d21;
+    --text: #e8eaed;
+    --muted: #9aa0a6;
+    --border: #2c3036;
+    --accent: #4f8cff;
+    --accent-text: #0b1020;
+    --danger: #f97066;
+    --tag: #23264a;
+    --tag-text: #c7d2fe;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+main {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+h1 {
+  margin: 0 0 16px;
+  font-size: 28px;
+}
+
+h2 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+input,
+button {
+  font: inherit;
+  color: inherit;
+}
+
+input {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  min-width: 0;
+}
+
+button {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+button.primary,
+form button {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+button.danger {
+  color: var(--danger);
+}
+
+form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+#title {
+  flex: 2 1 240px;
+}
+
+#tags {
+  flex: 1 1 160px;
+}
+
+.error {
+  margin: 8px 0 0;
+  color: var(--danger);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+@media (max-width: 640px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+#search {
+  width: 100%;
+}
+
+.todos,
+.tag-counts {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.todo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.todo .text {
+  flex: 1;
+  min-width: 0;
+}
+
+.todo.done .title {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+.meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 13px;
+}
+
+.tag {
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--tag);
+  color: var(--tag-text);
+  font-size: 13px;
+}
+
+.tag-counts li {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+}
