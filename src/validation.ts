@@ -63,6 +63,7 @@ export function parseId(value: string): number | null {
 function parseTitle(value: unknown): string {
   if (typeof value !== 'string') throw new ValidationError('title must be a string');
   const title = value.trim();
+  if (title === '') throw new ValidationError('title must not be empty');
   if (title.length > MAX_TITLE_LENGTH) {
     throw new ValidationError(`title must be at most ${MAX_TITLE_LENGTH} characters`);
   }
