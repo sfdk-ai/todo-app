@@ -2,6 +2,7 @@ const API = '/api';
 const PAGE_SIZE = 10;
 
 const state = { page: 1, q: '' };
+let latestRefresh = 0;
 const byId = (id) => document.getElementById(id);
 
 async function request(method, path, body) {
@@ -67,9 +68,12 @@ function renderTodo(todo) {
 }
 
 async function refresh() {
+  // Overlapping refreshes can answer out of order; only the newest one draws.
+  const ticket = ++latestRefresh;
   const params = new URLSearchParams({ page: String(state.page), pageSize: String(PAGE_SIZE) });
   if (state.q) params.set('q', state.q);
   const [list, tags] = await Promise.all([request('GET', `/todos?${params}`), request('GET', '/tags')]);
+  if (ticket !== latestRefresh) return;
 
   const pages = Math.max(1, Math.ceil(list.total / PAGE_SIZE));
   if (state.page > pages) {
