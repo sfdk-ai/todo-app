@@ -71,6 +71,19 @@ describe('GET /api/todos.csv', () => {
     expect(rows(response.body).map((row) => row.split(',')[0])).toEqual(['Milk the cow', 'Buy milk']);
   });
 
+  it('treats % and _ in q as plain characters', async () => {
+    await createTodo('Pay 50% deposit');
+    await createTodo('Pay 50 euros');
+    await createTodo('a_b');
+    await createTodo('axb');
+
+    const percent = await app.request('GET', `/api/todos.csv?q=${encodeURIComponent('50%')}`);
+    const underscore = await app.request('GET', '/api/todos.csv?q=a_b');
+
+    expect(rows(percent.body).map((row) => row.split(',')[0])).toEqual(['Pay 50% deposit']);
+    expect(rows(underscore.body).map((row) => row.split(',')[0])).toEqual(['a_b']);
+  });
+
   it('exports every todo when q is blank', async () => {
     await createTodo('Buy milk');
 
