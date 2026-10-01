@@ -61,4 +61,12 @@ describe('GET /api/tags', () => {
 
     expect((await app.request('GET', '/api/tags')).body).toEqual([]);
   });
+
+  it('counts a todo again once its delete is undone', async () => {
+    const milk = await app.request('POST', '/api/todos', { title: 'Buy milk', tags: ['groceries'] });
+    await app.request('DELETE', `/api/todos/${milk.body.id}`);
+    await app.request('POST', `/api/todos/${milk.body.id}/restore`);
+
+    expect((await app.request('GET', '/api/tags')).body).toEqual([{ name: 'groceries', count: 1 }]);
+  });
 });

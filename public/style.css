@@ -188,3 +188,30 @@ form {
   justify-content: space-between;
   margin-top: 12px;
 }
+
+.undo {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 8px 8px 8px 16px;
+  background: var(--text);
+  color: var(--background);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 20%);
+}
+
+.undo[hidden] {
+  display: none;
+}
+
+.undo button {
+  border-color: transparent;
+  background: transparent;
+  color: inherit;
+  font-weight: 600;
+}

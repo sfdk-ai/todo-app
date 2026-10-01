@@ -98,7 +98,8 @@ A todo looks like this:
 | `GET` | `/api/todos/:id` | Answers one todo. | 200 |
 | `PATCH` | `/api/todos/:id` | Changes any of `title`, `done` and `tags`. A `tags` list replaces the old one. Answers the todo. | 200 |
 | `POST` | `/api/todos/:id/done` | Marks a todo done. Answers the todo. | 200 |
-| `DELETE` | `/api/todos/:id` | Deletes a todo. | 204 |
+| `DELETE` | `/api/todos/:id` | Deletes a todo. It can be restored for 10 minutes. | 204 |
+| `POST` | `/api/todos/:id/restore` | Brings back a deleted todo with its id, done state, tags and creation time. Answers the todo, or 404 once it can no longer be restored. | 200 |
 | `GET` | `/api/tags` | Lists every tag with the number of todos carrying it, most used first: `[{ "name": "groceries", "count": 2 }]`. | 200 |
 
 To reopen a todo, send `PATCH /api/todos/:id` with `{ "done": false }`.
@@ -152,7 +153,9 @@ curl -X POST http://localhost:3000/api/todos/1/done
 curl -X PATCH http://localhost:3000/api/todos/1 \
   -H 'Content-Type: application/json' \
   -d '{"done": false, "tags": ["groceries", "weekend"]}'
+curl -X DELETE http://localhost:3000/api/todos/1
 
+curl -X POST http://localhost:3000/api/todos/1/restore
 curl -X DELETE http://localhost:3000/api/todos/1
 
 curl http://localhost:3000/api/tags

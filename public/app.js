@@ -32,6 +32,31 @@ async function act(work) {
   }
 }
 
+// After a delete, "Deleted. Undo" shows for a few seconds. A newer delete
+// replaces it, so Undo always restores the last todo deleted.
+const UNDO_MS = 5000;
+let undoId = null;
+let undoTimer;
+
+function offerUndo(id) {
+  undoId = id;
+  byId('undo').hidden = false;
+  clearTimeout(undoTimer);
+  undoTimer = setTimeout(hideUndo, UNDO_MS);
+}
+
+function hideUndo() {
+  clearTimeout(undoTimer);
+  undoId = null;
+  byId('undo').hidden = true;
+}
+
+byId('undo-button').addEventListener('click', () => {
+  const id = undoId;
+  hideUndo();
+  if (id !== null) act(() => request('POST', `/todos/${id}/restore`));
+});
+
 function element(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -60,7 +85,12 @@ function renderTodo(todo) {
   meta.append(element('span', 'muted', new Date(todo.createdAt).toLocaleDateString()));
   text.append(meta);
 
-  const remove = button('Delete', 'danger', () => act(() => request('DELETE', `/todos/${todo.id}`)));
+  const remove = button('Delete', 'danger', () =>
+    act(async () => {
+      await request('DELETE', `/todos/${todo.id}`);
+      offerUndo(todo.id);
+    }),
+  );
 
   item.append(statusButton, text, remove);
   return item;
