@@ -194,6 +194,18 @@ describe('POST /api/todos/:id/done', () => {
     expect(rows[0].done).toBe(true);
   });
 
+  it('leaves a done todo done when marked done again', async () => {
+    const created = await createTodo('Water the plants');
+    await app.request('POST', `/api/todos/${created.id}/done`);
+
+    const response = await app.request('POST', `/api/todos/${created.id}/done`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.done).toBe(true);
+    const { rows } = await app.pool.query('SELECT done FROM todos WHERE id = $1', [created.id]);
+    expect(rows[0].done).toBe(true);
+  });
+
   it('answers 404 for an unknown todo', async () => {
     expect((await app.request('POST', '/api/todos/999/done')).status).toBe(404);
   });

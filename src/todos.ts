@@ -90,7 +90,7 @@ export async function updateTodo(pool: pg.Pool, id: number, changes: TodoChanges
 }
 
 export async function markDone(pool: pg.Pool, id: number): Promise<Todo | null> {
-  const { rowCount } = await pool.query('UPDATE todos SET done = NOT done WHERE id = $1', [id]);
+  const { rowCount } = await pool.query('UPDATE todos SET done = true WHERE id = $1', [id]);
   return rowCount === 0 ? null : getTodo(pool, id);
 }
 
