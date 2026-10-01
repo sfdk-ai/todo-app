@@ -151,6 +151,15 @@ form {
   min-width: 0;
 }
 
+.todo .title {
+  cursor: text;
+}
+
+.title-edit {
+  width: 100%;
+  padding: 2px 6px;
+}
+
 .todo.done .title {
   text-decoration: line-through;
   color: var(--muted);
