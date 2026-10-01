@@ -21,6 +21,10 @@
       <div class="layout">
         <section aria-label="Todos">
           <input id="search" type="search" placeholder="Search" aria-label="Search todos">
+          <p id="filter" class="filter" hidden>
+            <span>Showing todos tagged <span id="filter-tag" class="tag"></span></span>
+            <button id="clear-filter" type="button">Clear filter</button>
+          </p>
           <ul id="todos" class="todos"></ul>
           <p id="empty" class="muted" hidden>Nothing here yet.</p>
           <nav class="pager" aria-label="Pages">

@@ -1,7 +1,7 @@
 const API = '/api';
 const PAGE_SIZE = 10;
 
-const state = { page: 1, q: '' };
+const state = { page: 1, q: '', tag: '' };
 const byId = (id) => document.getElementById(id);
 
 async function request(method, path, body) {
@@ -69,6 +69,7 @@ function renderTodo(todo) {
 async function refresh() {
   const params = new URLSearchParams({ page: String(state.page), pageSize: String(PAGE_SIZE) });
   if (state.q) params.set('q', state.q);
+  if (state.tag) params.set('tag', state.tag);
   const [list, tags] = await Promise.all([request('GET', `/todos?${params}`), request('GET', '/tags')]);
 
   const pages = Math.max(1, Math.ceil(list.total / PAGE_SIZE));
@@ -79,6 +80,9 @@ async function refresh() {
 
   byId('todos').replaceChildren(...list.items.map(renderTodo));
   byId('empty').hidden = list.items.length > 0;
+  byId('empty').textContent = state.tag ? 'No todos with this tag match.' : 'Nothing here yet.';
+  byId('filter').hidden = !state.tag;
+  byId('filter-tag').textContent = state.tag;
   byId('page-info').textContent = `Page ${state.page} of ${pages}`;
   byId('previous').disabled = state.page <= 1;
   byId('next').disabled = state.page >= pages;
@@ -86,12 +90,24 @@ async function refresh() {
   byId('tag-counts').replaceChildren(
     ...tags.map((tag) => {
       const item = element('li');
-      item.append(element('span', 'tag', tag.name), element('span', 'muted', String(tag.count)));
+      const selected = tag.name === state.tag;
+      const filterButton = button(tag.name, 'tag tag-filter', () => showTag(selected ? '' : tag.name));
+      filterButton.setAttribute('aria-pressed', String(selected));
+      filterButton.title = selected ? 'Show every todo' : `Show only todos tagged ${tag.name}`;
+      item.append(filterButton, element('span', 'muted', String(tag.count)));
       return item;
     }),
   );
   byId('no-tags').hidden = tags.length > 0;
 }
+
+function showTag(tag) {
+  state.tag = tag;
+  state.page = 1;
+  act(async () => {});
+}
+
+byId('clear-filter').addEventListener('click', () => showTag(''));
 
 byId('new-todo').addEventListener('submit', (event) => {
   event.preventDefault();
