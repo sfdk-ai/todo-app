@@ -11,9 +11,9 @@ export async function applySchema(pool: pg.Pool): Promise<void> {
   await pool.query(schema);
 }
 
-// Right after `docker compose up -d` Postgres is still starting, so the first
-// connections are refused for a few seconds.
-export async function waitForDatabase(pool: pg.Pool, timeoutMs = 30_000): Promise<void> {
+// Right after `docker compose up -d` Postgres is still starting. On an empty
+// volume it first creates its data directory, which can take half a minute.
+export async function waitForDatabase(pool: pg.Pool, timeoutMs = 90_000): Promise<void> {
   const deadline = Date.now() + timeoutMs;
   for (;;) {
     try {

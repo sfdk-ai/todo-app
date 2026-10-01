@@ -23,7 +23,7 @@ npm start
 
 Then open http://localhost:3000.
 
-`docker compose up -d` starts Postgres 16 as the Compose service `db`, on port 5432. `npm start` compiles the TypeScript to `dist/` and starts the server on port 3000. It waits up to 30 seconds for Postgres, so it's fine to run it straight after `docker compose up -d`.
+`docker compose up -d` starts Postgres 16 as the Compose service `db`, on port 5432. `npm start` compiles the TypeScript to `dist/` and starts the server on port 3000. The first time Postgres starts it creates its data directory, which can take half a minute, so `npm start` and the integration tests wait up to 90 seconds for it. It's fine to run them straight after `docker compose up -d`.
 
 To fill an empty database with a dozen sample todos:
 
