@@ -114,6 +114,30 @@ describe('GET /api/todos', () => {
     }
   });
 
+  it('treats %, _ and \\ in the search text as plain characters', async () => {
+    await createTodo('Pay 50% deposit');
+    await createTodo('Pay 50 euros');
+    await createTodo('Call grandma');
+    await createTodo('a_b');
+    await createTodo('axb');
+    await createTodo('C:\\temp');
+    await createTodo('C:temp');
+
+    for (const [q, titles] of [
+      ['50%', ['Pay 50% deposit']],
+      ['%', ['Pay 50% deposit']],
+      ['a_b', ['a_b']],
+      ['_', ['a_b']],
+      ['C:\\temp', ['C:\\temp']],
+    ] as const) {
+      const response = await app.request('GET', `/api/todos?q=${encodeURIComponent(q)}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.total, q).toBe(titles.length);
+      expect(response.body.items.map((todo: { title: string }) => todo.title), q).toEqual(titles);
+    }
+  });
+
   it('answers the first page and the total when there are more pages', async () => {
     for (const title of ['One', 'Two', 'Three', 'Four', 'Five']) {
       await createTodo(title);

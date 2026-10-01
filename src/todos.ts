@@ -33,8 +33,13 @@ type Queryable = pg.Pool | pg.PoolClient;
 
 const TODO_COLUMNS = 'id, title, done, created_at';
 
+// ILIKE reads %, _ and \ in its pattern as wildcards and an escape; escape them so q matches as plain text.
+function containsPattern(q: string | undefined): string | null {
+  return q === undefined ? null : `%${q.replace(/[\\%_]/g, '\\$&')}%`;
+}
+
 export async function listTodos(db: pg.Pool, { q, page, pageSize }: ListQuery): Promise<TodoPage> {
-  const search = q === undefined ? null : `%${q}%`;
+  const search = containsPattern(q);
   const first = (page - 1) * pageSize;
   const last = page * pageSize;
 
@@ -64,7 +69,7 @@ export async function exportTodos(db: pg.Pool, { q }: ExportQuery): Promise<Todo
        FROM todos
       WHERE $1::text IS NULL OR title ILIKE $1
       ORDER BY created_at DESC, id DESC`,
-    [q === undefined ? null : `%${q}%`],
+    [containsPattern(q)],
   );
   return withTags(db, rows);
 }
