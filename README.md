@@ -94,6 +94,7 @@ A todo looks like this:
 | --- | --- | --- | --- |
 | `GET` | `/api/health` | Checks the database connection. Answers `{ "ok": true }`. | 200 |
 | `GET` | `/api/todos` | Lists todos, newest first. Takes `q`, `page` and `pageSize`; see below. | 200 |
+| `GET` | `/api/todos.csv` | Downloads every todo as a CSV file, newest first. Takes `q`; see below. | 200 |
 | `POST` | `/api/todos` | Creates a todo from `{ "title", "tags" }`. `tags` is optional. Answers the new todo. | 201 |
 | `GET` | `/api/todos/:id` | Answers one todo. | 200 |
 | `PATCH` | `/api/todos/:id` | Changes any of `title`, `done` and `tags`. A `tags` list replaces the old one. Answers the todo. | 200 |
@@ -126,6 +127,23 @@ It answers one page and the total number of matching todos:
 
 A page past the end answers an empty `items` list.
 
+### Exporting todos as CSV
+
+`GET /api/todos.csv` answers every todo as a file named `todos.csv`, with no paging. It takes one optional query parameter, `q`, which keeps only the todos whose title contains that text, as in the list. The web page's **Download CSV** link passes the current search.
+
+The file has a header row and one row per todo:
+
+```csv
+title,done,created_at,tags
+Buy milk,false,2026-10-01T07:25:53.619Z,groceries; weekend
+"Call grandma, then mum",true,2026-10-01T07:26:10.002Z,
+```
+
+- `done` is `true` or `false`, and `created_at` is an ISO 8601 time in UTC.
+- `tags` holds the todo's tags joined with `; `, and is empty when it has none.
+- Cells holding a comma, a double quote or a line break are quoted, as RFC 4180 says. Lines end with CRLF, and the file starts with a UTF-8 byte order mark so that Excel reads it as UTF-8.
+- A title that starts with `=`, `+`, `-` or `@` gets a `'` in front, so that a spreadsheet does not run it as a formula.
+
 ### Errors
 
 An error answers a JSON body with a message:
@@ -146,6 +164,8 @@ curl -X POST http://localhost:3000/api/todos \
   -d '{"title": "Buy milk", "tags": ["groceries"]}'
 
 curl 'http://localhost:3000/api/todos?q=milk&page=1&pageSize=10'
+
+curl -o todos.csv 'http://localhost:3000/api/todos.csv?q=milk'
 
 curl -X POST http://localhost:3000/api/todos/1/done
 

@@ -1,6 +1,6 @@
 import type pg from 'pg';
 import { inTransaction } from './db.js';
-import type { ListQuery, NewTodo, TodoChanges } from './validation.js';
+import type { ExportQuery, ListQuery, NewTodo, TodoChanges } from './validation.js';
 
 export interface Todo {
   id: number;
@@ -56,6 +56,17 @@ export async function listTodos(db: pg.Pool, { q, page, pageSize }: ListQuery): 
   );
 
   return { items: await withTags(db, rows), page, pageSize, total: counted.rows[0].total };
+}
+
+export async function exportTodos(db: pg.Pool, { q }: ExportQuery): Promise<Todo[]> {
+  const { rows } = await db.query<TodoRow>(
+    `SELECT ${TODO_COLUMNS}
+       FROM todos
+      WHERE $1::text IS NULL OR title ILIKE $1
+      ORDER BY created_at DESC, id DESC`,
+    [q === undefined ? null : `%${q}%`],
+  );
+  return withTags(db, rows);
 }
 
 export async function getTodo(db: Queryable, id: number): Promise<Todo | null> {

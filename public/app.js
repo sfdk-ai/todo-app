@@ -77,6 +77,8 @@ async function refresh() {
     return refresh();
   }
 
+  const search = state.q ? `?${new URLSearchParams({ q: state.q })}` : '';
+  byId('download').href = `${API}/todos.csv${search}`;
   byId('todos').replaceChildren(...list.items.map(renderTodo));
   byId('empty').hidden = list.items.length > 0;
   byId('page-info').textContent = `Page ${state.page} of ${pages}`;

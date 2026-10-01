@@ -13,6 +13,10 @@ export interface TodoChanges {
   tags?: string[];
 }
 
+export interface ExportQuery {
+  q?: string;
+}
+
 export interface ListQuery {
   q?: string;
   page: number;
@@ -52,6 +56,11 @@ export function parseListQuery(query: Record<string, unknown>): ListQuery {
     throw new ValidationError(`pageSize must be a whole number from 1 to ${MAX_PAGE_SIZE}`);
   }
   return q ? { q, page, pageSize } : { page, pageSize };
+}
+
+export function parseExportQuery(query: Record<string, unknown>): ExportQuery {
+  const q = single(query, 'q')?.trim();
+  return q ? { q } : {};
 }
 
 export function parseId(value: string): number | null {
