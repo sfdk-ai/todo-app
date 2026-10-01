@@ -33,14 +33,19 @@ type Queryable = pg.Pool | pg.PoolClient;
 
 const TODO_COLUMNS = 'id, title, done, created_at';
 
-export async function listTodos(db: pg.Pool, { q, page, pageSize }: ListQuery): Promise<TodoPage> {
+// Matches the todos for a search ($1) and a tag ($2); either may be null.
+const LIST_FILTER = `($1::text IS NULL OR title ILIKE $1)
+  AND ($2::text IS NULL OR EXISTS (SELECT 1 FROM todo_tags WHERE todo_id = todos.id AND tag = $2))`;
+
+export async function listTodos(db: pg.Pool, { q, tag, page, pageSize }: ListQuery): Promise<TodoPage> {
   const search = q === undefined ? null : `%${q}%`;
+  const filter = [search, tag ?? null];
   const first = (page - 1) * pageSize;
   const last = page * pageSize;
 
   const counted = await db.query<{ total: number }>(
-    `SELECT count(*)::int AS total FROM todos WHERE $1::text IS NULL OR title ILIKE $1`,
-    [search],
+    `SELECT count(*)::int AS total FROM todos WHERE ${LIST_FILTER}`,
+    filter,
   );
   const { rows } = await db.query<TodoRow>(
     `SELECT ${TODO_COLUMNS}
@@ -48,11 +53,11 @@ export async function listTodos(db: pg.Pool, { q, page, pageSize }: ListQuery): 
          SELECT ${TODO_COLUMNS},
                 row_number() OVER (ORDER BY created_at DESC, id DESC) AS position
            FROM todos
-          WHERE $1::text IS NULL OR title ILIKE $1
+          WHERE ${LIST_FILTER}
        ) numbered
-      WHERE position BETWEEN $2 AND $3
+      WHERE position > $3 AND position <= $4
       ORDER BY position`,
-    [search, first, last],
+    [...filter, first, last],
   );
 
   return { items: await withTags(db, rows), page, pageSize, total: counted.rows[0].total };

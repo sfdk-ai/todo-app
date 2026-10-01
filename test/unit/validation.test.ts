@@ -94,6 +94,14 @@ describe('parseListQuery', () => {
     expect(parseListQuery({ q: '   ' })).toEqual({ page: 1, pageSize: 20 });
   });
 
+  it('reads the tag, trimmed and lowercased as tags are stored', () => {
+    expect(parseListQuery({ tag: ' Groceries ', q: 'milk' })).toEqual({ page: 1, pageSize: 20, q: 'milk', tag: 'groceries' });
+  });
+
+  it('ignores a blank tag', () => {
+    expect(parseListQuery({ tag: '  ' })).toEqual({ page: 1, pageSize: 20 });
+  });
+
   it('rejects a page that is not a positive whole number', () => {
     for (const page of ['0', '-1', '1.5', 'two']) {
       expect(() => parseListQuery({ page })).toThrow(new ValidationError('page must be a whole number of at least 1'));

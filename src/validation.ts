@@ -15,6 +15,7 @@ export interface TodoChanges {
 
 export interface ListQuery {
   q?: string;
+  tag?: string;
   page: number;
   pageSize: number;
 }
@@ -43,6 +44,7 @@ export function parseTodoChanges(body: unknown): TodoChanges {
 
 export function parseListQuery(query: Record<string, unknown>): ListQuery {
   const q = single(query, 'q')?.trim();
+  const tag = single(query, 'tag')?.trim().toLowerCase();
   const page = wholeNumber(single(query, 'page'), 1);
   const pageSize = wholeNumber(single(query, 'pageSize'), DEFAULT_PAGE_SIZE);
   if (page === null || page < 1) {
@@ -51,7 +53,7 @@ export function parseListQuery(query: Record<string, unknown>): ListQuery {
   if (pageSize === null || pageSize < 1 || pageSize > MAX_PAGE_SIZE) {
     throw new ValidationError(`pageSize must be a whole number from 1 to ${MAX_PAGE_SIZE}`);
   }
-  return q ? { q, page, pageSize } : { page, pageSize };
+  return { ...(q ? { q } : {}), ...(tag ? { tag } : {}), page, pageSize };
 }
 
 export function parseId(value: string): number | null {

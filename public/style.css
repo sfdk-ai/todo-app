@@ -175,7 +175,34 @@ form {
 .tag-counts li {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 4px 0;
+}
+
+button.tag-filter {
+  border: 1px solid transparent;
+  line-height: inherit;
+}
+
+button.tag-filter:hover {
+  border-color: var(--tag-text);
+}
+
+button.tag-filter[aria-pressed="true"] {
+  background: var(--tag-text);
+  color: var(--tag);
+}
+
+.filter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 12px 0 0;
+}
+
+.filter[hidden] {
+  display: none;
 }
 
 .muted {

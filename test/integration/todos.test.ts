@@ -127,6 +127,88 @@ describe('GET /api/todos', () => {
     expect(response.body.items.map((todo: { title: string }) => todo.title)).toEqual(['Five', 'Four']);
   });
 
+  it('answers the next page without repeating the last todo of the page before', async () => {
+    for (const title of ['One', 'Two', 'Three', 'Four', 'Five']) {
+      await createTodo(title);
+    }
+
+    const response = await app.request('GET', '/api/todos?page=2&pageSize=2');
+
+    expect(response.status).toBe(200);
+    expect(response.body.total).toBe(5);
+    expect(response.body.items.map((todo: { title: string }) => todo.title)).toEqual(['Three', 'Two']);
+  });
+
+  it('lists only the todos carrying the tag, with their total', async () => {
+    await createTodo('Buy milk', ['groceries']);
+    await createTodo('Prepare slides', ['work']);
+    await createTodo('Pick up bread', ['groceries', 'errands']);
+
+    const response = await app.request('GET', '/api/todos?tag=groceries');
+
+    expect(response.status).toBe(200);
+    expect(response.body.total).toBe(2);
+    expect(response.body.items.map((todo: { title: string }) => todo.title)).toEqual(['Pick up bread', 'Buy milk']);
+    expect(response.body.items[0].tags).toEqual(['errands', 'groceries']);
+  });
+
+  it('matches the tag whatever its case and surrounding spaces', async () => {
+    await createTodo('Buy milk', ['groceries']);
+    await createTodo('Prepare slides', ['work']);
+
+    const response = await app.request('GET', `/api/todos?tag=${encodeURIComponent(' Groceries ')}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.items.map((todo: { title: string }) => todo.title)).toEqual(['Buy milk']);
+  });
+
+  it('searches only the todos carrying the tag', async () => {
+    await createTodo('Buy milk', ['groceries']);
+    await createTodo('Buy a train ticket', ['work']);
+    await createTodo('Buy bread', ['groceries']);
+    await createTodo('Pick up eggs', ['groceries']);
+
+    const response = await app.request('GET', '/api/todos?tag=groceries&q=buy');
+
+    expect(response.status).toBe(200);
+    expect(response.body.total).toBe(2);
+    expect(response.body.items.map((todo: { title: string }) => todo.title)).toEqual(['Buy bread', 'Buy milk']);
+  });
+
+  it('pages through the todos carrying the tag', async () => {
+    for (const title of ['One', 'Two', 'Three', 'Four', 'Five']) {
+      await createTodo(title, ['home']);
+      await createTodo(`${title} at work`, ['work']);
+    }
+    const titles = (body: { items: { title: string }[] }) => body.items.map((todo) => todo.title);
+
+    const first = await app.request('GET', '/api/todos?tag=home&page=1&pageSize=2');
+    const second = await app.request('GET', '/api/todos?tag=home&page=2&pageSize=2');
+    const third = await app.request('GET', '/api/todos?tag=home&page=3&pageSize=2');
+
+    expect(first.body.total).toBe(5);
+    expect(titles(first.body)).toEqual(['Five', 'Four']);
+    expect(titles(second.body)).toEqual(['Three', 'Two']);
+    expect(titles(third.body)).toEqual(['One']);
+  });
+
+  it('answers an empty page for a tag no todo carries', async () => {
+    await createTodo('Buy milk', ['groceries']);
+
+    const response = await app.request('GET', '/api/todos?tag=garden');
+
+    expect(response.status).toBe(200);
+    expect(response.body.items).toEqual([]);
+    expect(response.body.total).toBe(0);
+  });
+
+  it('answers 400 when the tag is given more than once', async () => {
+    const response = await app.request('GET', '/api/todos?tag=home&tag=work');
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({ error: 'tag must be given once' });
+  });
+
   it('answers an empty page past the end', async () => {
     await createTodo('Buy milk');
 

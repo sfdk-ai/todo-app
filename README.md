@@ -93,7 +93,7 @@ A todo looks like this:
 | Method | Path | What it does | Success |
 | --- | --- | --- | --- |
 | `GET` | `/api/health` | Checks the database connection. Answers `{ "ok": true }`. | 200 |
-| `GET` | `/api/todos` | Lists todos, newest first. Takes `q`, `page` and `pageSize`; see below. | 200 |
+| `GET` | `/api/todos` | Lists todos, newest first. Takes `q`, `tag`, `page` and `pageSize`; see below. | 200 |
 | `POST` | `/api/todos` | Creates a todo from `{ "title", "tags" }`. `tags` is optional. Answers the new todo. | 201 |
 | `GET` | `/api/todos/:id` | Answers one todo. | 200 |
 | `PATCH` | `/api/todos/:id` | Changes any of `title`, `done` and `tags`. A `tags` list replaces the old one. Answers the todo. | 200 |
@@ -105,11 +105,12 @@ To reopen a todo, send `PATCH /api/todos/:id` with `{ "done": false }`.
 
 ### Listing todos
 
-`GET /api/todos` takes three query parameters, all optional:
+`GET /api/todos` takes four query parameters, all optional:
 
 | Parameter | Default | Meaning |
 | --- | --- | --- |
 | `q` | none | Only todos whose title contains this text. |
+| `tag` | none | Only todos carrying this tag. It is trimmed and lowercased, as tags are. With `q`, only this tag's todos are searched. |
 | `page` | `1` | Which page to answer, counting from 1. |
 | `pageSize` | `20` | How many todos a page holds, from 1 to 100. |
 
@@ -146,6 +147,8 @@ curl -X POST http://localhost:3000/api/todos \
   -d '{"title": "Buy milk", "tags": ["groceries"]}'
 
 curl 'http://localhost:3000/api/todos?q=milk&page=1&pageSize=10'
+
+curl 'http://localhost:3000/api/todos?tag=groceries&q=milk'
 
 curl -X POST http://localhost:3000/api/todos/1/done
 
