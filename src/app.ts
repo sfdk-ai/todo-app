@@ -1,7 +1,7 @@
 import express, { type ErrorRequestHandler, type RequestHandler } from 'express';
 import { fileURLToPath } from 'node:url';
 import type pg from 'pg';
-import { createTodo, deleteTodo, getTodo, listTags, listTodos, markDone, updateTodo } from './todos.js';
+import { createTodo, deleteTodo, getTodo, listTags, listTodos, markDone, restoreTodo, updateTodo } from './todos.js';
 import { ValidationError, parseId, parseListQuery, parseNewTodo, parseTodoChanges } from './validation.js';
 
 const publicDir = fileURLToPath(new URL('../public/', import.meta.url));
@@ -38,6 +38,11 @@ export function createApp(pool: pg.Pool): express.Express {
   app.post('/api/todos/:id/done', async (req, res) => {
     const id = parseId(req.params.id);
     sendTodo(res, id === null ? null : await markDone(pool, id));
+  });
+
+  app.post('/api/todos/:id/restore', async (req, res) => {
+    const id = parseId(req.params.id);
+    sendTodo(res, id === null ? null : await restoreTodo(pool, id));
   });
 
   app.delete('/api/todos/:id', async (req, res) => {

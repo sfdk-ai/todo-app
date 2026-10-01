@@ -256,6 +256,67 @@ describe('DELETE /api/todos/:id', () => {
   it('answers 404 for an unknown todo', async () => {
     expect((await app.request('DELETE', '/api/todos/999')).status).toBe(404);
   });
+
+  it('answers 404 for a todo already deleted', async () => {
+    const todo = await createTodo('Buy milk');
+    await app.request('DELETE', `/api/todos/${todo.id}`);
+
+    expect((await app.request('DELETE', `/api/todos/${todo.id}`)).status).toBe(404);
+  });
+
+  it('leaves a deleted todo unchangeable', async () => {
+    const todo = await createTodo('Buy milk');
+    await app.request('DELETE', `/api/todos/${todo.id}`);
+
+    expect((await app.request('PATCH', `/api/todos/${todo.id}`, { title: 'Buy bread' })).status).toBe(404);
+    expect((await app.request('POST', `/api/todos/${todo.id}/done`)).status).toBe(404);
+    expect((await app.request('GET', '/api/todos')).body.total).toBe(0);
+  });
+
+  it('erases todos deleted more than 10 minutes ago on the next delete', async () => {
+    const old = await createTodo('Buy milk');
+    const recent = await createTodo('Call grandma');
+    await app.request('DELETE', `/api/todos/${old.id}`);
+    await app.pool.query(`UPDATE todos SET deleted_at = now() - interval '11 minutes' WHERE id = $1`, [old.id]);
+
+    await app.request('DELETE', `/api/todos/${recent.id}`);
+
+    const { rows } = await app.pool.query('SELECT id FROM todos ORDER BY id');
+    expect(rows).toEqual([{ id: recent.id }]);
+    expect((await app.request('POST', `/api/todos/${old.id}/restore`)).status).toBe(404);
+  });
+});
+
+describe('POST /api/todos/:id/restore', () => {
+  it('brings a deleted todo back with its id, state, tags and place', async () => {
+    const older = await createTodo('Buy milk');
+    const todo = await createTodo('Call grandma', ['family', 'phone']);
+    await createTodo('Fix the tap');
+    await app.request('POST', `/api/todos/${todo.id}/done`);
+    const before = (await app.request('GET', `/api/todos/${todo.id}`)).body;
+    await app.request('DELETE', `/api/todos/${todo.id}`);
+
+    const response = await app.request('POST', `/api/todos/${todo.id}/restore`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(before);
+    expect(response.body.tags).toEqual(['family', 'phone']);
+    const list = await app.request('GET', '/api/todos');
+    expect(list.body.items.map((item: { title: string }) => item.title)).toEqual([
+      'Fix the tap',
+      'Call grandma',
+      'Buy milk',
+    ]);
+    expect(list.body.items[2].id).toBe(older.id);
+  });
+
+  it('answers 404 for a todo that is not deleted, unknown or malformed', async () => {
+    const todo = await createTodo('Buy milk');
+
+    expect((await app.request('POST', `/api/todos/${todo.id}/restore`)).status).toBe(404);
+    expect((await app.request('POST', '/api/todos/999/restore')).status).toBe(404);
+    expect((await app.request('POST', '/api/todos/abc/restore')).status).toBe(404);
+  });
 });
 
 describe('the rest of the server', () => {

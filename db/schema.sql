@@ -23,4 +23,7 @@ BEGIN
 END
 $$;
 
+-- A deleted todo keeps its row for a while, so it can be restored.
+ALTER TABLE todos ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
+
 CREATE INDEX IF NOT EXISTS todo_tags_tag_idx ON todo_tags (tag);
