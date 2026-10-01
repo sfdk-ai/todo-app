@@ -48,6 +48,17 @@ describe('POST /api/todos', () => {
     expect(rows[0].count).toBe(0);
   });
 
+  it('answers 400 with a message when the title is empty or blank', async () => {
+    for (const title of ['', '   ']) {
+      const response = await app.request('POST', '/api/todos', { title });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({ error: 'title must not be empty' });
+    }
+    const { rows } = await app.pool.query('SELECT count(*)::int AS count FROM todos');
+    expect(rows[0].count).toBe(0);
+  });
+
   it('answers 400 when the title is too long', async () => {
     const response = await app.request('POST', '/api/todos', { title: 'x'.repeat(201) });
 
@@ -177,6 +188,11 @@ describe('PATCH /api/todos/:id', () => {
     const bad = await app.request('PATCH', `/api/todos/${created.id}`, { done: 'yes' });
     expect(bad.status).toBe(400);
     expect(bad.body).toEqual({ error: 'done must be true or false' });
+
+    const blank = await app.request('PATCH', `/api/todos/${created.id}`, { title: '   ' });
+    expect(blank.status).toBe(400);
+    expect(blank.body).toEqual({ error: 'title must not be empty' });
+    expect((await app.request('GET', `/api/todos/${created.id}`)).body.title).toBe('Buy milk');
 
     expect((await app.request('PATCH', '/api/todos/999', { done: true })).status).toBe(404);
   });

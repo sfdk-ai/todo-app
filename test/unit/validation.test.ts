@@ -25,6 +25,12 @@ describe('parseNewTodo', () => {
     expect(() => parseNewTodo({ title: 42 })).toThrow(new ValidationError('title must be a string'));
   });
 
+  it('rejects an empty or blank title', () => {
+    for (const title of ['', '   ', '\t\n']) {
+      expect(() => parseNewTodo({ title })).toThrow(new ValidationError('title must not be empty'));
+    }
+  });
+
   it('rejects a title longer than 200 characters', () => {
     expect(() => parseNewTodo({ title: 'x'.repeat(201) })).toThrow(
       new ValidationError('title must be at most 200 characters'),
@@ -68,6 +74,10 @@ describe('parseTodoChanges', () => {
 
   it('rejects a title that is not a string', () => {
     expect(() => parseTodoChanges({ title: null })).toThrow(new ValidationError('title must be a string'));
+  });
+
+  it('rejects a blank title', () => {
+    expect(() => parseTodoChanges({ title: '  ' })).toThrow(new ValidationError('title must not be empty'));
   });
 });
 
