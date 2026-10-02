@@ -1,3 +1,5 @@
+import { setUpThemeSwitch } from './theme.js';
+
 const API = '/api';
 const PAGE_SIZE = 10;
 
@@ -125,5 +127,7 @@ byId('next').addEventListener('click', () => {
   state.page += 1;
   act(async () => {});
 });
+
+setUpThemeSwitch(byId('theme-switch'), window.localStorage, document.documentElement);
 
 act(async () => {});

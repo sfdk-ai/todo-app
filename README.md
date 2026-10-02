@@ -3,7 +3,7 @@
 A small todo app: an HTTP API on Postgres, and a web page served by the same server.
 
 - `src/` is the server: Express 5 and TypeScript, talking to Postgres through `pg`.
-- `public/` is the web page, plain HTML and JavaScript with no build step.
+- `public/` is the web page, plain HTML and JavaScript with no build step. It follows the computer's light or dark setting; the switch in its header overrides that and is remembered in the browser (`public/theme.js`).
 - `db/schema.sql` is the database schema. The server applies it when it starts.
 
 The mobile app, [`sfdk-ai/todo-mobile`](https://github.com/sfdk-ai/todo-mobile), is another client of the same API.
